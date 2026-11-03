@@ -1,0 +1,830 @@
+
+#root {
+  width: 100%;
+  overflow: hidden;
+}
+
+.site-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 76px;
+  padding: 14px 6%;
+  background: #101010;
+  border-bottom: 1px solid #282828;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 29px;
+  font-weight: 900;
+  transform: skew(-5deg);
+}
+
+.brand-name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.brand-name strong {
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 2.4px;
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.navigation > a:not(.nav-cta) {
+  color: #d2d2d2;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+
+.navigation > a:not(.nav-cta):hover {
+  color: var(--gold);
+}
+
+.nav-cta,
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 700;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.nav-cta {
+  min-height: 42px;
+  background: var(--red);
+}
+
+.nav-cta:hover,
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.menu-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #393939;
+  background: #181818;
+  border-radius: 5px;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: center;
+  gap: 5%;
+  min-height: 580px;
+  padding: 76px 8%;
+  background:
+    radial-gradient(ellipse at 12% 15%, #381516 0, transparent 38%),
+    linear-gradient(120deg, #111 0%, #171515 60%, #101010 100%);
+}
+
+.hero-content {
+  max-width: 600px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 12px #e52b3570;
+}
+
+.hero h1,
+.section-heading h2,
+.membership-content h2,
+.contact-section h2 {
+  margin: 22px 0;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: clamp(52px, 6.5vw, 88px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -1px;
+}
+
+.hero h1 span,
+.section-heading h2 span,
+.membership-content h2 span,
+.contact-section h2 span {
+  color: var(--red);
+}
+
+.hero-description {
+  max-width: 450px;
+  color: #b7b7b7;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.button-primary {
+  background: var(--red);
+  color: white;
+}
+
+.button-primary:hover {
+  background: #c91f29;
+}
+
+.button-secondary {
+  border-color: #555;
+  background: transparent;
+}
+
+.button-secondary:hover {
+  border-color: var(--gold);
+}
+
+.hero-highlights {
+  display: flex;
+  gap: 32px;
+  margin-top: 46px;
+  padding-top: 24px;
+  border-top: 1px solid #363333;
+}
+
+.hero-highlights div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hero-highlights strong {
+  color: var(--gold);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 30px;
+}
+
+.hero-highlights span {
+  color: #aaa;
+  font-size: 11px;
+}
+
+.hero-visual {
+  position: relative;
+  min-width: 0;
+}
+
+.hero-image {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 390px;
+  overflow: hidden;
+  border: 1px solid #60402b;
+  background:
+    linear-gradient(145deg, #3c1b1b, #181818 55%, #3d3020);
+}
+
+.hero-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #080808ed 0%, #08080810 75%);
+  pointer-events: none;
+}
+
+.image-caption {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 28px;
+}
+
+.image-caption span {
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.image-caption strong {
+  max-width: 100%;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: clamp(20px, 2.2vw, 32px);
+  line-height: 1.15;
+  overflow-wrap: break-word;
+}
+
+.floating-card {
+  position: absolute;
+  right: -12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #484035;
+  background: #171717;
+  box-shadow: 0 12px 30px #0005;
+}
+
+
+.admin-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.admin-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #38332a;
+  border-radius: 10px;
+  background: #171717;
+}
+
+.admin-summary-card > span {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.admin-summary-card strong {
+  color: #e7bd69;
+  font-size: clamp(23px, 3vw, 32px);
+  overflow-wrap: anywhere;
+}
+
+.admin-summary-card small {
+  color: #888;
+  font-size: 11px;
+}
+
+@media (max-width: 800px) {
+  .admin-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.floating-icon {
+  color: var(--gold);
+  font-size: 30px;
+}
+
+.floating-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.floating-card strong {
+  font-size: 12px;
+}
+
+.floating-card div span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.section {
+  padding: 80px 8%;
+}
+
+.sports-section {
+  background: #151515;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 34px;
+}
+
+.section-heading h2,
+.membership-content h2,
+.contact-section h2 {
+  margin: 14px 0 0;
+  font-size: clamp(38px, 4.2vw, 56px);
+}
+
+.section-heading > p {
+  max-width: 360px;
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.sports-grid,
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.sport-card {
+  padding: 28px;
+  border: 1px solid #333;
+  background: linear-gradient(145deg, #1d1d1d, #171717);
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.sport-card:hover {
+  border-color: #76513d;
+  transform: translateY(-3px);
+}
+
+.sport-card-top,
+.sport-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.sport-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  background: #342020;
+  font-size: 27px;
+}
+
+.court-count {
+  color: var(--gold);
+  font-size: 11px;
+}
+
+.sport-card h3 {
+  margin: 24px 0 8px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 30px;
+}
+
+.sport-card > p,
+.pricing-card > p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.sport-card-bottom {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #333;
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.price strong {
+  color: var(--gold);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 34px;
+}
+
+.price span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.round-link {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #4b4b4b;
+  font-size: 18px;
+}
+
+.round-link:hover {
+  border-color: var(--red);
+  background: var(--red);
+}
+
+.pricing-section {
+  background: #101010;
+}
+
+.pricing-card {
+  padding: 30px;
+  border: 1px solid #383838;
+  background: #171717;
+}
+
+.pricing-card:first-child {
+  border-top: 2px solid var(--red);
+}
+
+.pricing-card:last-child {
+  border-top: 2px solid var(--gold);
+}
+
+.pricing-label {
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.pricing-amount {
+  margin-top: 24px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 54px;
+  font-weight: 900;
+}
+
+.pricing-amount span {
+  margin-left: 8px;
+  color: var(--muted);
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.full-button {
+  width: 100%;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pricing-note {
+  margin-top: 22px;
+  color: #8c8c8c;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.membership-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 36px;
+  background:
+    radial-gradient(ellipse at 90% 50%, #542020 0, transparent 45%),
+    #1a1414;
+  border-top: 1px solid #382222;
+  border-bottom: 1px solid #382222;
+}
+
+.membership-content {
+  max-width: 600px;
+}
+
+.membership-content > p,
+.contact-section > p {
+  max-width: 480px;
+  margin: 20px 0 26px;
+  color: #b7b7b7;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.button-light {
+  background: var(--gold);
+  color: #17120a;
+}
+
+.button-light:hover {
+  background: #f3d18b;
+}
+
+.membership-decoration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  min-height: 220px;
+  border: 1px solid #80613b;
+  border-radius: 50%;
+  color: var(--gold);
+}
+
+.membership-decoration > span {
+  font-size: 60px;
+}
+
+.membership-decoration strong {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 26px;
+  letter-spacing: 3px;
+}
+
+.membership-decoration small {
+  margin-top: 5px;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+.contact-section {
+  text-align: center;
+  background: #151515;
+}
+
+.contact-section h2 {
+  max-width: 760px;
+  margin: 18px auto;
+}
+
+.contact-section > p {
+  margin: 18px auto 26px;
+}
+
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px 6%;
+  border-top: 1px solid #303030;
+  background: #101010;
+}
+
+.footer-brand .brand-mark {
+  width: 36px;
+  height: 36px;
+  font-size: 24px;
+}
+
+.footer-brand .brand-name {
+  font-size: 11px;
+}
+
+.footer-brand .brand-name strong {
+  font-size: 9px;
+}
+
+.site-footer > p,
+.copyright {
+  color: #999;
+  font-size: 11px;
+}
+
+@media (min-width: 1500px) {
+  .site-header,
+  .hero,
+  .section,
+  .site-footer {
+    padding-right: max(8%, calc((100% - 1250px) / 2));
+    padding-left: max(8%, calc((100% - 1250px) / 2));
+  }
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    padding-right: 5%;
+    padding-left: 5%;
+  }
+
+  .navigation {
+    gap: 16px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr 0.85fr;
+    padding: 64px 5%;
+  }
+
+  .hero-image {
+    min-height: 330px;
+  }
+
+  .floating-card {
+    right: -8px;
+  }
+
+  .section {
+    padding: 64px 5%;
+  }
+
+  .membership-decoration {
+    min-width: 175px;
+    min-height: 175px;
+  }
+}
+
+@media (max-width: 680px) {
+  .site-header {
+    min-height: 70px;
+    padding: 12px 5%;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    font-size: 26px;
+  }
+
+  .brand-name {
+    font-size: 11px;
+  }
+
+  .brand-name strong {
+    font-size: 9px;
+  }
+
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+  }
+
+  .navigation {
+    position: absolute;
+    top: calc(100% + 1px);
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 12px 5% 20px;
+    border-bottom: 1px solid #383838;
+    background: #121212;
+  }
+
+  .navigation-open {
+    display: flex;
+  }
+
+  .navigation > a:not(.nav-cta) {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    border-bottom: 1px solid #282828;
+  }
+
+  .nav-cta {
+    margin-top: 14px;
+    min-height: 48px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 52px 5% 60px;
+  }
+
+  .hero h1 {
+    font-size: clamp(54px, 14vw, 76px);
+  }
+
+  .hero-description {
+    font-size: 14px;
+  }
+
+  .hero-highlights {
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .hero-highlights strong {
+    font-size: 27px;
+  }
+
+  .hero-highlights span {
+    font-size: 10px;
+  }
+
+  .hero-image {
+    min-height: 270px;
+  }
+
+  .floating-card {
+    right: 8px;
+    bottom: -18px;
+    padding: 12px;
+  }
+
+  .section {
+    padding: 58px 5%;
+  }
+
+  .section-heading {
+    display: block;
+    margin-bottom: 26px;
+  }
+
+  .section-heading h2,
+  .membership-content h2,
+  .contact-section h2 {
+    font-size: 43px;
+  }
+
+  .section-heading > p {
+    margin-top: 14px;
+  }
+
+  .sports-grid,
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .sport-card,
+  .pricing-card {
+    padding: 22px;
+  }
+
+  .membership-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .membership-decoration {
+    align-self: center;
+    min-width: 180px;
+    min-height: 180px;
+  }
+
+  .contact-section h2 {
+    font-size: 40px;
+  }
+
+  .site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 28px 5%;
+  }
+
+  .site-footer > p {
+    margin: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
