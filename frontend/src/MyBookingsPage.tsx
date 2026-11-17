@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useCustomerAuth } from "./CustomerAuthContext";
 import "./MyBookingsPage.css";
 
-const API = "http://127.0.0.1:8000";
+import API_URL from "./api";
 
 type HistoryBooking = {
   booking_id: number;
@@ -41,7 +41,7 @@ const [error, setError] = useState("");
   setBookingQrs({});
 
   try {
-    const response = await fetch(`${API}/api/customer/bookings`, {
+    const response = await fetch(`${API_URL}/api/customer/bookings`, {
       headers: {
         Authorization: `Bearer ${customerToken}`,
       },
@@ -68,7 +68,7 @@ const [error, setError] = useState("");
       eligibleBookings.map(async (item) => {
         try {
           const qrResponse = await fetch(
-            `${API}/api/access/booking/${item.booking_id}/qr`,
+            `${API_URL}/api/access/booking/${item.booking_id}/qr`,
             {
               headers: {
                 Authorization: `Bearer ${customerToken}`,

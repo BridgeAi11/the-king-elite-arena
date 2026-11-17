@@ -2,10 +2,7 @@
 import { useEffect, useState } from "react";
 import "./BookingPage.css";
 import { useCustomerAuth } from "./CustomerAuthContext";
-
-
-
-const API = "http://127.0.0.1:8000";
+import API from "./api";
 
 declare global {
   interface Window {

@@ -5,6 +5,7 @@ from app.auth import require_admin
 from decimal import Decimal
 from typing import Annotated
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -80,14 +81,16 @@ app.include_router(access_router)
 
 
 
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173",
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=[origin.strip() for origin in allowed_origins if origin.strip()],
     allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "PATCH"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 

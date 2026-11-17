@@ -7,12 +7,12 @@ import {
   type ReactNode,
 } from "react";
 
-const API = "http://127.0.0.1:8000";
+import API_URL from "./api";
 
 export type Customer = {
   id: number;
-  full_name: string;
   phone: string;
+  full_name: string;
   is_active: boolean;
 };
 
@@ -54,7 +54,7 @@ export function CustomerAuthProvider({
     setAuthLoading(true);
 
     try {
-      const response = await fetch(`${API}/api/customer-auth/me`, {
+      const response = await fetch(`${API_URL}/api/customer-auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

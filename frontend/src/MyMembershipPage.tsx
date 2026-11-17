@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useCustomerAuth } from "./CustomerAuthContext";
 import "./MyMembershipPage.css";
 
-const API = "http://127.0.0.1:8000";
+import API_URL from "./api";
 
 
 declare global {
@@ -94,9 +94,12 @@ const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   setError("");
   setMembershipQrs({});
 
+
   try {
     const response = await fetch(
-      `${API}/api/public/my-memberships`,
+      `${API_URL
+    
+      }/api/public/my-memberships`,
       {
         headers: {
           Authorization: `Bearer ${customerToken}`,
@@ -124,7 +127,7 @@ const [purchaseSuccess, setPurchaseSuccess] = useState(false);
       eligibleMemberships.map(async (item) => {
         try {
           const qrResponse = await fetch(
-            `${API}/api/access/membership/${item.membership_id}/qr`,
+            `${API_URL}/api/access/membership/${item.membership_id}/qr`,
             {
               headers: {
                 Authorization: `Bearer ${customerToken}`,
@@ -182,7 +185,7 @@ const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   }, [authLoading, loadMemberships]);
 
   useEffect(() => {
-    fetch(`${API}/api/public/membership-plans`)
+    fetch(`${API_URL}/api/public/membership-plans`)
       .then(async (response) => {
         if (!response.ok) throw new Error("Unable to load plans.");
         return response.json();
@@ -211,7 +214,7 @@ async function buyMembership(planId: number) {
     }
 
     const orderResponse = await fetch(
-      `${API}/api/membership-payments/create-order?plan_id=${planId}`,
+      `${API_URL}/api/membership-payments/create-order?plan_id=${planId}`,
       {
         method: "POST",
         headers: {
@@ -243,7 +246,7 @@ async function buyMembership(planId: number) {
         handler: async (paymentResponse) => {
           try {
             const verifyResponse = await fetch(
-              `${API}/api/membership-payments/verify`,
+              `${API_URL}/api/membership-payments/verify`,
               {
                 method: "POST",
                 headers: {

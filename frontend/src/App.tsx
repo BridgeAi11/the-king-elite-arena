@@ -6,7 +6,7 @@
   import { CustomerAuthProvider, useCustomerAuth } from "./CustomerAuthContext";
   import MyBookingsPage from "./MyBookingsPage";
   import MyMembershipPage from "./MyMembershipPage";
-
+  import API_URL from "./api";
 
   type MembershipPlan = {
     id: number;
@@ -72,9 +72,7 @@
 
       async function loadPublicConfig() {
         try {
-          const response = await fetch(
-            "http://127.0.0.1:8000/api/public/config"
-          );
+          const response = await fetch(`${API_URL}/api/public/config`);
 
           if (!response.ok) {
             throw new Error("Unable to load public configuration");
@@ -105,10 +103,7 @@
 
     async function loadPublicPricing() {
       try {
-        const response = await fetch(
-          "http://127.0.0.1:8000/api/public/pricing"
-        );
-
+        const response = await fetch(`${API_URL}/api/public/pricing`);
         if (!response.ok) {
           throw new Error("Unable to load public pricing.");
         }
@@ -146,7 +141,7 @@
     async function loadMembershipPlans() {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/public/membership-plans"
+          `${API_URL}/api/public/membership-plans`
         );
 
         if (!response.ok) {
