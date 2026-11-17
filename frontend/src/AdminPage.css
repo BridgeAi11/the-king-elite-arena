@@ -573,3 +573,460 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* =========================================
+   MEMBERSHIP MANAGEMENT - FINAL UI FIX
+========================================= */
+
+/* Two membership cards per row */
+.admin-panel .admin-sports-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 20px;
+}
+
+/* Membership card */
+.admin-panel .admin-sport-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #414141;
+  border-top: 2px solid #b58b46;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #1d1b19, #121212);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-panel .admin-sport-card:hover {
+  border-color: #e7bd69;
+  transform: translateY(-3px);
+}
+
+/* Plan name and status */
+.admin-panel .admin-sport-card h3 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 19px;
+}
+
+.admin-panel .admin-sport-card strong {
+  display: block;
+  margin: 10px 0 5px;
+  color: #e7bd69;
+  font-size: 25px;
+}
+
+.admin-panel .admin-sport-card p {
+  margin: 5px 0 10px;
+  color: #aaa;
+  font-size: 13px;
+}
+
+.admin-panel .admin-sport-card small {
+  display: block;
+  color: #d0d0d0;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* Edit and activate buttons */
+.admin-panel .admin-sport-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.admin-panel .admin-sport-controls button {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 14px;
+}
+
+.admin-panel .admin-sport-controls .admin-secondary-button {
+  flex: 1.3;
+  border: 1px solid #555;
+  background: #242424;
+  color: #fff;
+}
+
+.admin-panel .admin-sport-controls .admin-secondary-button:hover {
+  background: #353535;
+}
+
+.admin-panel .admin-sport-controls .admin-primary-button {
+  flex: 1;
+}
+
+/* Mobile and tablet */
+@media (max-width: 850px) {
+  .admin-panel .admin-sports-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-panel .admin-sport-card {
+    padding: 17px;
+  }
+
+  .admin-panel .admin-sport-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-panel .admin-sport-controls button {
+    width: 100%;
+    flex: none;
+  }
+}
+
+
+/* =====================================
+   MEMBERSHIP FORM - DARK THEME FIX
+===================================== */
+
+/* Description textarea */
+.admin-page textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 90px;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #101010 !important;
+  color: #f5f5f5 !important;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.admin-page textarea::placeholder {
+  color: #777;
+}
+
+.admin-page textarea:focus {
+  border-color: #e7bd69;
+  outline: 2px solid #e7bd6930;
+}
+
+/* Membership form action buttons */
+.admin-panel .admin-form-grid .admin-full-field:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-panel .admin-form-grid .admin-full-field button {
+  min-width: 140px;
+  width: auto;
+}
+
+/* Better checkbox alignment */
+.admin-panel .admin-active-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+/* Consistent form field spacing */
+.admin-panel .admin-form-grid {
+  row-gap: 20px;
+}
+
+
+/* =========================================
+   COUPON MANAGEMENT - RESPONSIVE UI
+========================================= */
+
+.coupon-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.coupon-active-toggle {
+  justify-content: flex-start;
+  width: fit-content;
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid #383838;
+  border-radius: 8px;
+  background: #121212;
+}
+
+.coupon-active-toggle input {
+  width: 17px;
+  height: 17px;
+  accent-color: #e52b35;
+}
+
+.coupon-toolbar {
+  flex-wrap: wrap;
+  margin-top: 28px;
+  padding: 14px 0;
+  border-top: 1px solid #333;
+}
+
+.coupon-toolbar button {
+  min-width: 145px;
+}
+
+.coupon-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.coupon-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #393939;
+  border-left: 3px solid #e7bd69;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #1d1b19, #121212);
+  transition: border-color 0.2s ease;
+}
+
+.coupon-card:hover {
+  border-color: #b58b46;
+}
+
+.coupon-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.coupon-card-heading > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  min-width: 0;
+}
+
+.coupon-code {
+  color: #fff;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  overflow-wrap: anywhere;
+}
+
+.coupon-card .coupon-discount {
+  display: block;
+  margin: 0;
+  color: #e7bd69;
+  font-size: 22px;
+  line-height: 1.3;
+  text-align: right;
+}
+
+.coupon-card > p {
+  margin: 0;
+  color: #aaa;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.coupon-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #303030;
+  border-radius: 8px;
+  background: #101010;
+}
+
+.coupon-meta span {
+  min-width: 0;
+  color: #c7c7c7;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.coupon-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.coupon-card-actions button {
+  min-width: 105px;
+}
+
+.coupon-card-actions .admin-secondary-button {
+  flex: 0 0 auto;
+}
+
+.coupon-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #383838;
+}
+
+.coupon-history-heading h3 {
+  margin: 0 0 6px;
+  color: #f5f5f5;
+  font-size: 20px;
+}
+
+.coupon-history-heading p {
+  margin: 0;
+  color: #999;
+  font-size: 13px;
+}
+
+.coupon-history-heading button {
+  min-width: 125px;
+}
+
+.coupon-list > .admin-help {
+  grid-column: 1 / -1;
+}
+
+/* Tablet */
+@media (max-width: 850px) {
+  .coupon-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .coupon-card {
+    padding: 16px;
+  }
+
+  .coupon-card-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .coupon-card .coupon-discount {
+    text-align: left;
+    font-size: 21px;
+  }
+
+  .coupon-meta {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .coupon-card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .coupon-card-actions button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .coupon-history-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .coupon-history-heading button {
+    width: 100%;
+  }
+
+  .coupon-form-actions button {
+    width: 100%;
+  }
+
+  .coupon-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .coupon-toolbar button {
+    width: 100%;
+  }
+}
+.admin-pricing-rules {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.admin-pricing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-pricing-rule {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--admin-border, #e5e7eb);
+  border-radius: 12px;
+}
+
+.admin-pricing-rule .admin-field {
+  min-width: 0;
+}
+
+.admin-pricing-rule input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .admin-pricing-rule {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-pricing-rule > button {
+    grid-column: 1 / -1;
+  }
+
+  .admin-pricing-header {
+    align-items: flex-start;
+  }
+}
+
+/* Align pricing sections at the same vertical position */
+.admin-panel .admin-pricing-card {
+  justify-content: flex-start;
+}
+
+.admin-pricing-card .admin-pricing-rules {
+  margin-top: 20px;
+}

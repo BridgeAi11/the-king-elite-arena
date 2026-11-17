@@ -1,4 +1,5 @@
-# Environment variables
+@'
+# Environment variables and secrets
 .env
 .env.*
 !.env.example
@@ -14,6 +15,13 @@ node_modules/
 dist/
 build/
 
+# Database backups
+*.sql
+*.dump
+*.backup
+*.sqlite3
+*.db
+
 # IDE
 .vscode/
 .idea/
@@ -24,3 +32,4 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+'@ | Set-Content .gitignore

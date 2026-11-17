@@ -1,29 +1,84 @@
 
-import os
-import secrets
-from datetime import time
+from fastapi import Depends, FastAPI, HTTPException
+from datetime import date, time
+from app.auth import require_admin
 from decimal import Decimal
 from typing import Annotated
+import logging
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+logger = logging.getLogger(__name__)
+
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import SessionLocal, check_database_connection
-from app.models import FacilitySettings, SportPricing
+from app.models import FacilitySettings, SportPricing, SportPricingRule
 from app.booking_routes import router as booking_router
 from app.admin_routes import router as admin_bookings_router
+from app.membership_routes import (
+    router as membership_router,
+    public_router as public_membership_router,
+)
+from app.auth_routes import router as auth_router
+from app.customer_auth_routes import router as customer_auth_router
+from app.customer_booking_routes import router as customer_booking_router
+from app.coupon_routes import (
+    admin_router as admin_coupon_router,
+    public_router as customer_coupon_router,
+)
+from app.payment_routes import router as payment_router
+from app.refund_routes import router as admin_refund_router
+from app.membership_payment_routes import (
+    router as membership_payment_router,
+)
+import asyncio
+from contextlib import asynccontextmanager
+
+from app.booking_expiry import booking_expiry_loop
+from app.admin_pricing_routes import router as admin_pricing_router
+from app.access_routes import router as access_router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    expiry_task = asyncio.create_task(booking_expiry_loop())
+
+    try:
+        yield
+    finally:
+        expiry_task.cancel()
+
+        try:
+            await expiry_task
+        except asyncio.CancelledError:
+            pass
+
 
 app = FastAPI(
     title="The King Elite Arena API",
     description="Backend API for The King Elite Arena sports facility.",
     version="0.3.0",
+    lifespan=lifespan,
 )
 
 app.include_router(booking_router)
+app.include_router(customer_booking_router)
 app.include_router(admin_bookings_router)
+app.include_router(membership_router)
+app.include_router(public_membership_router)
+app.include_router(auth_router)
+app.include_router(customer_auth_router)
+app.include_router(admin_coupon_router)
+app.include_router(customer_coupon_router)
+app.include_router(payment_router)
+app.include_router(membership_payment_router)
+app.include_router(admin_refund_router)
+app.include_router(admin_pricing_router)
+app.include_router(access_router)
+
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,7 +88,7 @@ app.add_middleware(
     ],
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "PATCH"],
-    allow_headers=["*", "X-Admin-Key"],
+    allow_headers=["*"],
 )
 
 WEEKDAYS = {
@@ -46,25 +101,6 @@ WEEKDAYS = {
     "Sunday",
 }
 
-
-def require_admin(
-    x_admin_key: Annotated[str | None, Header()] = None,
-) -> None:
-    configured_key = os.getenv("ADMIN_API_KEY")
-
-    if not configured_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Admin authentication is not configured.",
-        )
-
-    if not x_admin_key or not secrets.compare_digest(
-        x_admin_key, configured_key
-    ):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid or missing admin key.",
-        )
 
 
 AdminAuth = Annotated[None, Depends(require_admin)]
@@ -169,6 +205,51 @@ def get_public_config():
             detail="Unable to load public facility settings.",
         )
 
+@app.get("/api/public/pricing", tags=["Public"])
+def get_public_pricing():
+    try:
+        with SessionLocal() as db:
+            sports = db.scalars(
+                select(SportPricing)
+                .where(SportPricing.is_active.is_(True))
+                .order_by(SportPricing.sport_name)
+            ).all()
+
+            result = []
+
+            for sport in sports:
+                rules = db.scalars(
+                    select(SportPricingRule)
+                    .where(
+                        SportPricingRule.sport_id == sport.id,
+                        SportPricingRule.is_active.is_(True),
+                    )
+                    .order_by(SportPricingRule.hour_from)
+                ).all()
+
+                result.append({
+                    "sport_id": sport.id,
+                    "sport_name": sport.sport_name,
+                    "rules": [
+                        {
+                            "hour_from": rule.hour_from,
+                            "hour_to": rule.hour_to,
+                            "price_per_player": float(
+                                rule.price_per_player
+                            ),
+                        }
+                        for rule in rules
+                    ],
+                })
+
+            return {"sports": result}
+
+    except SQLAlchemyError:
+        logger.exception("Unable to load public pricing.")
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to load public pricing.",
+        )
 
 @app.get(
     "/api/admin/config",
