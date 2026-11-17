@@ -1,0 +1,261 @@
+
+.my-bookings-page {
+  min-height: 100vh;
+  padding: 40px 20px 70px;
+  background: #101010;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.my-bookings-container {
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+}
+
+.my-bookings-back {
+  display: inline-block;
+  margin-bottom: 30px;
+  color: #d8ad52;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.my-bookings-header,
+.my-bookings-list-heading,
+.my-booking-top,
+.my-booking-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.my-bookings-eyebrow {
+  color: #d8ad52;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.my-bookings-header h1 {
+  margin: 10px 0;
+  font-size: clamp(30px, 5vw, 42px);
+}
+
+.my-bookings-header p,
+.my-bookings-info {
+  color: #aaa;
+  line-height: 1.6;
+}
+
+.my-bookings-refresh,
+.my-bookings-empty button {
+  padding: 11px 16px;
+  border: 1px solid #66532e;
+  border-radius: 8px;
+  background: #242017;
+  color: #e1b65c;
+  cursor: pointer;
+}
+
+.my-bookings-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 30px 0;
+}
+
+.my-bookings-summary > div {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid #383838;
+  border-radius: 12px;
+  background: #1b1b1b;
+}
+
+.my-bookings-summary span,
+.my-booking-details span,
+.my-booking-bottom span {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.my-bookings-summary strong {
+  color: #e1b65c;
+  font-size: 28px;
+}
+
+.my-bookings-list-section {
+  margin-top: 35px;
+}
+
+.my-bookings-list-heading {
+  margin-bottom: 18px;
+}
+
+.my-bookings-list-heading h2 {
+  font-size: 21px;
+}
+
+.my-bookings-list-heading span {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.my-bookings-list {
+  display: grid;
+  gap: 16px;
+}
+
+.my-booking-card {
+  padding: 22px;
+  border: 1px solid #383838;
+  border-radius: 13px;
+  background: #1b1b1b;
+}
+
+.my-booking-sport {
+  color: #d8ad52;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.my-booking-top h3 {
+  margin: 8px 0 0;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.my-booking-status {
+  padding: 6px 11px;
+  border-radius: 20px;
+  background: #333;
+  color: #eee;
+  font-size: 11px;
+  text-transform: capitalize;
+}
+
+.my-booking-status.status-confirmed {
+  background: #173c27;
+  color: #8de0a8;
+}
+
+.my-booking-status.status-pending {
+  background: #49391d;
+  color: #ffd18a;
+}
+
+.my-booking-status.status-cancelled {
+  background: #482323;
+  color: #ffaaaa;
+}
+
+.my-booking-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  padding: 22px 0;
+  margin-top: 18px;
+  border-top: 1px solid #383838;
+  border-bottom: 1px solid #383838;
+}
+
+.my-booking-details > div {
+  display: grid;
+  gap: 7px;
+}
+
+.my-booking-details strong {
+  font-size: 14px;
+  text-transform: capitalize;
+  overflow-wrap: anywhere;
+}
+
+.my-booking-bottom {
+  padding-top: 17px;
+}
+
+.my-booking-bottom strong {
+  color: #e1b65c;
+  font-size: 20px;
+}
+
+.my-bookings-empty {
+  padding: 45px 20px;
+  border: 1px dashed #51432a;
+  border-radius: 12px;
+  background: #1b1b1b;
+  text-align: center;
+}
+
+.my-bookings-empty h2,
+.my-bookings-empty h3 {
+  margin: 12px 0;
+}
+
+.my-bookings-empty p {
+  color: #aaa;
+  line-height: 1.6;
+}
+
+.my-bookings-empty-icon {
+  font-size: 35px;
+}
+
+.my-bookings-primary {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 13px 20px;
+  border-radius: 8px;
+  background: #d8ad52;
+  color: #17120a;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 650px) {
+  .my-bookings-page {
+    padding: 25px 14px 50px;
+  }
+
+  .my-bookings-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .my-bookings-summary {
+    gap: 9px;
+  }
+
+  .my-bookings-summary > div {
+    padding: 14px 10px;
+    gap: 8px;
+  }
+
+  .my-bookings-summary span {
+    font-size: 11px;
+  }
+
+  .my-bookings-summary strong {
+    font-size: 23px;
+  }
+
+  .my-booking-card {
+    padding: 16px;
+  }
+
+  .my-booking-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 17px 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .my-bookings-summary {
+    grid-template-columns: 1fr;
+  }
+}

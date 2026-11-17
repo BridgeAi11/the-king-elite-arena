@@ -1,16 +1,13 @@
-
-import os
-import secrets
 from datetime import date
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
-from sqlalchemy import select, or_
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.auth import require_admin
 from app.database import SessionLocal
 from app.models import Booking, SportPricing
-from sqlalchemy import case, func, select
 
 router = APIRouter(
     prefix="/api/admin/bookings",
@@ -18,24 +15,6 @@ router = APIRouter(
 )
 
 
-def require_admin(
-    x_admin_key: Annotated[str | None, Header()] = None,
-) -> None:
-    configured_key = os.getenv("ADMIN_API_KEY")
-
-    if not configured_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Admin authentication is not configured.",
-        )
-
-    if not x_admin_key or not secrets.compare_digest(
-        x_admin_key, configured_key
-    ):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid or missing admin key.",
-        )
 
 
 @router.get("/summary", dependencies=[Depends(require_admin)])
