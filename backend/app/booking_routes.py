@@ -39,6 +39,11 @@ class BookingRequest(BaseModel):
         min_length=3,
         max_length=40,
     )
+    phone: str = Field(
+        min_length=10,
+        max_length=10,
+        pattern=r"^[6-9][0-9]{9}$"
+    )
 
     @model_validator(mode="after")
     def validate_players(self):
@@ -569,7 +574,7 @@ def create_booking(
 
                 customer_id=authenticated_customer.id,
                 customer_name=authenticated_customer.full_name,
-                customer_phone=authenticated_customer.phone,
+                customer_phone=request.phone,
 
                 sport_id=sport_record.id,
                 booking_date=request.booking_date,

@@ -40,6 +40,10 @@ from contextlib import asynccontextmanager
 from app.booking_expiry import booking_expiry_loop
 from app.admin_pricing_routes import router as admin_pricing_router
 from app.access_routes import router as access_router
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.security import limiter
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
 @asynccontextmanager
@@ -56,12 +60,37 @@ async def lifespan(app: FastAPI):
         except asyncio.CancelledError:
             pass
 
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+
+        response.headers["X-Content-Type-Options"] = "nosniff"
+
+        response.headers["X-Frame-Options"] = "DENY"
+
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=()"
+        )
+
+        return response
 
 app = FastAPI(
     title="The King Elite Arena API",
     description="Backend API for The King Elite Arena sports facility.",
     version="0.3.0",
     lifespan=lifespan,
+)
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+app.state.limiter = limiter
+
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler,
 )
 
 app.include_router(booking_router)

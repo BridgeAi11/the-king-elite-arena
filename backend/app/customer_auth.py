@@ -9,10 +9,12 @@ from app.auth import get_db
 from app.models import Customer
 
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+JWT_SECRET_KEY = os.getenv("CUSTOMER_JWT_SECRET_KEY")
 
 if not JWT_SECRET_KEY:
-    raise RuntimeError("JWT_SECRET_KEY is missing")
+    raise RuntimeError("CUSTOMER_JWT_SECRET_KEY is missing")
+
+
 
 
 def create_customer_token(customer_id: int) -> str:

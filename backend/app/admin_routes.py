@@ -7,7 +7,11 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.auth import require_admin
 from app.database import SessionLocal
-from app.models import Booking, SportPricing
+from app.models import (
+    Booking,
+    SportPricing,
+    MembershipTransaction,
+)
 
 router = APIRouter(
     prefix="/api/admin/bookings",
@@ -21,6 +25,7 @@ router = APIRouter(
 def get_booking_summary():
     try:
         with SessionLocal() as db:
+            # Existing booking summary
             result = db.execute(
                 select(
                     func.count(Booking.id).label("total_bookings"),
@@ -51,11 +56,28 @@ def get_booking_summary():
                 )
             ).one()
 
+            # Membership revenue: successfully paid transactions only
+            membership_revenue = db.execute(
+                select(
+                    func.coalesce(
+                        func.sum(MembershipTransaction.amount),
+                        0,
+                    )
+                ).where(
+                    MembershipTransaction.payment_status == "paid"
+                )
+            ).scalar_one()
+
+            booking_revenue = float(result.verified_revenue or 0)
+            membership_revenue = float(membership_revenue or 0)
+
             return {
                 "total_bookings": result.total_bookings or 0,
                 "pending_bookings": result.pending_bookings or 0,
                 "confirmed_bookings": result.confirmed_bookings or 0,
-                "verified_revenue": float(result.verified_revenue or 0),
+                "verified_revenue": booking_revenue,
+                "membership_revenue": membership_revenue,
+                "total_revenue": booking_revenue + membership_revenue,
             }
 
     except SQLAlchemyError:

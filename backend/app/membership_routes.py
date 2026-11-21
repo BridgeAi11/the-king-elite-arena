@@ -228,7 +228,7 @@ def get_my_memberships(
         memberships = (
             db.query(CustomerMembership)
             .filter(
-                CustomerMembership.customer_phone == customer.phone
+                CustomerMembership.customer_id == customer.id
             )
             .order_by(CustomerMembership.created_at.desc())
             .all()

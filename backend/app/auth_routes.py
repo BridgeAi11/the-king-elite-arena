@@ -4,6 +4,8 @@ import time
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from fastapi import Request
+from app.security import limiter
 
 from app.auth import (
     create_access_token,
@@ -24,7 +26,9 @@ class AdminLoginRequest(BaseModel):
 
 
 @router.post("/login")
+@limiter.limit("5/minute")
 def admin_login(
+    request: Request,
     credentials: AdminLoginRequest,
     db: Session = Depends(get_db),
 ):

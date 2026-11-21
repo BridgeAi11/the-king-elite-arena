@@ -17,14 +17,16 @@ password_hash = PasswordHash.recommended()
 
 security = HTTPBearer(auto_error=False)
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+JWT_SECRET_KEY = os.getenv("ADMIN_JWT_SECRET_KEY")
 JWT_ALGORITHM = "HS256"
+
+if not JWT_SECRET_KEY:
+    raise RuntimeError("ADMIN_JWT_SECRET_KEY is missing")
+
 JWT_EXPIRE_MINUTES = int(
     os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 )
 
-if not JWT_SECRET_KEY:
-    raise RuntimeError("JWT_SECRET_KEY is missing from backend/.env")
 
 
 def get_db():
@@ -49,10 +51,11 @@ def create_access_token(admin_id: int) -> str:
     )
 
     payload = {
-        "sub": str(admin_id),
-        "exp": expires_at,
-        "iat": datetime.now(timezone.utc),
-    }
+    "sub": str(admin_id),
+    "type": "admin",
+    "exp": expires_at,
+    "iat": datetime.now(timezone.utc),
+}
 
     return jwt.encode(
         payload,
@@ -87,6 +90,9 @@ def require_admin(
             JWT_SECRET_KEY,
             algorithms=[JWT_ALGORITHM],
         )
+
+        if payload.get("type") != "admin":
+            raise credentials_error
 
         admin_id = int(payload["sub"])
 

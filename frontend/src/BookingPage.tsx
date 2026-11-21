@@ -6,6 +6,32 @@ import API from "./api";
 
 declare global {
   interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (options: {
+            client_id: string;
+            callback: (response: {
+              credential: string;
+            }) => void;
+          }) => void;
+
+          renderButton: (
+            element: HTMLElement,
+            options: Record<string, string | number>
+          ) => void;
+        };
+      };
+    };
+  }
+
+  interface ImportMetaEnv {
+    readonly VITE_GOOGLE_CLIENT_ID: string;
+  }
+}
+
+declare global {
+  interface Window {
     Razorpay: new (options: {
       key: string;
       amount: number;
@@ -91,7 +117,7 @@ export default function BookingPage() {
   const selectedMembershipPlanId = new URLSearchParams(
   window.location.search
 ).get("membershipPlan");
-  console.log("Selected Membership Plan:", selectedMembershipPlanId);     
+  console.log("Selected Membership Plan:", selectedMembershipPlanId);
   const [sports, setSports] = useState<Sport[]>([]);
   const [facility, setFacility] = useState<Facility | null>(null);
 
@@ -106,7 +132,7 @@ export default function BookingPage() {
   const [courtType, setCourtType] = useState<"general" | "girls_only">(
     "general"
   );
-  
+
 
   // Shared customer authentication
 const {
@@ -117,17 +143,55 @@ const {
   logoutCustomer,
 } = useCustomerAuth();
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 useEffect(() => {
   if (!authLoading && customer && returnTo) {
     window.location.replace(returnTo);
   }
 }, [authLoading, customer, returnTo]);
 
-const [customerName, setCustomerName] = useState("");
 const [phone, setPhone] = useState("");
-const [otp, setOtp] = useState("");
-const [otpSent, setOtpSent] = useState(false);
-const [otpLoading, setOtpLoading] = useState(false);
+const [googleLoading, setGoogleLoading] = useState(false);
+
+async function handleGoogleLogin(credential: string) {
+  setGoogleLoading(true);
+  setMessage("");
+
+  try {
+    const response = await fetch(
+      `${API}/api/customer-auth/google`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ credential }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.detail || "Google login failed.");
+    }
+
+    loginCustomer(data.access_token, data.customer);
+
+    setPhone(data.customer.phone ?? "");
+
+    setMessage("Google login successful!");
+
+  } catch (error) {
+    setMessage(
+      error instanceof Error
+        ? error.message
+        : "Google login failed."
+    );
+  } finally {
+    setGoogleLoading(false);
+  }
+}
 
   // Booking
   const [message, setMessage] = useState("");
@@ -137,7 +201,7 @@ const [otpLoading, setOtpLoading] = useState(false);
   // Booking QR
   const [bookingQr, setBookingQr] = useState<string | null>(null);
 
-  
+
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState("");
@@ -197,6 +261,71 @@ console.log(
   }, []);
 
 
+  // Initialize Google Sign-In
+  useEffect(() => {
+    // Wait until the facility and login section are ready.
+    if (!facility || customer || authLoading) return;
+
+    if (!googleClientId) {
+      console.error("VITE_GOOGLE_CLIENT_ID is missing.");
+      setMessage("Google Sign-In configuration is missing.");
+      return;
+    }
+
+    let cancelled = false;
+
+    const renderGoogleButton = () => {
+      if (cancelled) return;
+
+      const target = document.getElementById("google-signin-button");
+
+      if (!target || !window.google) return;
+
+      target.innerHTML = "";
+
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: (response) => {
+          void handleGoogleLogin(response.credential);
+        },
+      });
+
+      window.google.accounts.id.renderButton(target, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "rectangular",
+        width: 300,
+      });
+    };
+
+    if (window.google) {
+      renderGoogleButton();
+    } else {
+      let script = document.querySelector<HTMLScriptElement>(
+        'script[src="https://accounts.google.com/gsi/client"]'
+      );
+
+      if (!script) {
+        script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+
+      script.addEventListener("load", renderGoogleButton);
+
+      // Handle an already-loaded script.
+      if (window.google) {
+        renderGoogleButton();
+      }
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [facility, customer, authLoading, googleClientId]);
 
 
   const totalPlayers = malePlayers + femalePlayers;
@@ -207,120 +336,7 @@ console.log(
     ? (selectedSport.hourly_rate * duration) / 60
     : 0;
 
-  // Request OTP
-  async function requestOTP(e: React.FormEvent) {
-    e.preventDefault();
-    setMessage("");
-    setOtp("");
-    setOtpSent(false);
 
-    if (customerName.trim().length < 2) {
-      setMessage("Please enter your full name.");
-      return;
-    }
-
-    setOtpLoading(true);
-
-    try {
-      const response = await fetch(
-        `${API}/api/customer-auth/request-otp`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            full_name: customerName.trim(),
-            phone: phone.trim(),
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : "Unable to send OTP."
-        );
-      }
-
-      setOtpSent(true);
-      setMessage("OTP sent successfully! Please check your mobile SMS.");
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "OTP request failed."
-      );
-    } finally {
-      setOtpLoading(false);
-    }
-  }
-
-  // Verify OTP
-  async function verifyOTP(e: React.FormEvent) {
-    e.preventDefault();
-    setMessage("");
-
-    
-  
-
-
-    if (!/^[0-9]{6}$/.test(otp)) {
-      setMessage("Please enter a valid 6-digit OTP.");
-      return;
-    }
-
-    setOtpLoading(true);
-
-    try {
-      const response = await fetch(
-        `${API}/api/customer-auth/verify-otp`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phone: phone.trim(),
-            otp,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : "OTP verification failed."
-        );
-      }
-
-      loginCustomer(data.access_token, data.customer);
-
-      if (returnTo) {
-        window.location.replace(returnTo);
-        return;
-      }
-
-      setCustomerName(data.customer.full_name);
-      setPhone(data.customer.phone);
-
-      setOtp("");
-      setOtpSent(false);
-      setMessage("Login successful! You can now book your play.");
-    } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "OTP verification failed."
-      );
-    } finally {
-      setOtpLoading(false);
-    }
-  }
 
 
 
@@ -425,9 +441,9 @@ async function startRazorpayPayment(bookingId: number): Promise<void> {
       order_id: orderData.order_id,
 
       prefill: {
-        name: customer.full_name,
-        contact: customer.phone,
-      },
+  name: customer.full_name,
+  contact: customer.phone ?? phone ?? "",
+},
 
       handler: async (paymentResponse) => {
         try {
@@ -503,6 +519,11 @@ async function loadBookingQr(bookingId: number): Promise<void> {
 setBooking(null);
 setBookingQr(null);
 
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+  setMessage("Please enter a valid 10-digit mobile number.");
+  return;
+}
+
     if (!customer || !customerToken) {
       setMessage("Please login before creating a booking.");
       return;
@@ -546,6 +567,7 @@ setBookingQr(null);
         },
         body: JSON.stringify({
           sport,
+          phone: phone,
           booking_date: bookingDate,
           start_time: `${startTime}:00`,
           duration_minutes: duration,
@@ -673,81 +695,15 @@ try {
         ) : authLoading ? (
           <p>Checking your customer session…</p>
         ) : !customer ? (
-          <>
-            <h2>Customer Login</h2>
+        <section className="customer-login">
+          <h2>Customer Login</h2>
+          <p>Continue with your Google account to book your play.</p>
 
-            <p>Verify your mobile number to continue booking.</p>
+          <div id="google-signin-button"></div>
 
-            {!otpSent ? (
-              <form onSubmit={requestOTP}>
-                <label>
-                  Full name
-                  <input
-                    type="text"
-                    required
-                    minLength={2}
-                    maxLength={120}
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Enter your full name"
-                  />
-                </label>
-
-                <label>
-                  Phone number
-                  <input
-                    type="tel"
-                    required
-                    maxLength={20}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Enter your mobile number"
-                  />
-                </label>
-
-                <button type="submit" disabled={otpLoading}>
-                  {otpLoading ? "Sending OTP…" : "Send OTP"}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={verifyOTP}>
-               <p>OTP sent to mobile number {phone}. Enter the 6-digit code.</p>
-
-                <label>
-                  Enter 6-digit OTP
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    maxLength={6}
-                    required
-                    value={otp}
-                    onChange={(e) =>
-                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
-                    }
-                    placeholder="Enter OTP"
-                  />
-                </label>
-
-                <button type="submit" disabled={otpLoading}>
-                  {otpLoading ? "Verifying…" : "Verify OTP"}
-                </button>
-
-                <button
-                  type="button"
-                  disabled={otpLoading}
-                  onClick={() => {
-                    setOtpSent(false);
-                    setOtp("");
-                    setMessage("");
-                  }}
-                >
-                  Change phone number
-                </button>
-              </form>
-            )}
-          </>
-        ) : (
+          {googleLoading && <p>Signing in...</p>}
+        </section>
+      ) : (
           <>
             <div className="customer-session">
   <div className="customer-session-avatar">
@@ -757,19 +713,40 @@ try {
   <div className="customer-session-info">
     <span className="customer-session-label">BOOKING AS</span>
     <strong>{customer.full_name}</strong>
-    <span>{customer.phone}</span>
+    <span>
+  {customer.phone
+    ? customer.phone
+    : "Mobile number not added yet"}
+</span>
   </div>
 
   <span className="customer-session-badge">
     Logged In
   </span>
 </div>
-           
+
             <h2>Booking Details</h2>
 
             <form onSubmit={submitBooking} className="booking-form-grid">
               <div className="booking-fields-grid">
-
+              <label>
+  Mobile Number
+  <input
+  type="tel"
+  inputMode="numeric"
+  maxLength={10}
+  required
+  value={phone}
+  autoComplete="tel"
+  onChange={(e) =>
+    setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+  }
+  placeholder="10-digit mobile number"
+/>
+<small className="booking-field-help">
+  Enter your mobile number for booking contact purposes.
+</small>
+</label>
               <label>
                 Sport
                 <select

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import "./AdminPage.css";
 import API_URL from "./api";
+import kingArenaLogo from "./assets/king-elite-arena-logo.png";
 
 const WEEKDAYS = [
   "Monday",
@@ -94,6 +95,8 @@ type DashboardSummary = {
   pending_bookings: number;
   confirmed_bookings: number;
   verified_revenue: number;
+  membership_revenue: number;
+  total_revenue: number;
 };
 
 type MembershipPlan = {
@@ -178,6 +181,8 @@ type CouponForm = {
   is_active: boolean;
 };
 
+
+
 function toLocalDateTimeInput(date: Date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   return local.toISOString().slice(0, 16);
@@ -202,7 +207,17 @@ function createEmptyCouponForm(): CouponForm {
   };
 }
 
+type ConfirmDialogState = {
+  title: string;
+  message: string;
+  confirmLabel: string;
+  onConfirm: () => Promise<void>;
+};
 
+type ToastState = {
+  message: string;
+  type: "success" | "error";
+};
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(
@@ -227,6 +242,41 @@ const [loginError, setLoginError] = useState("");
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [confirmDialog, setConfirmDialog] =
+  useState<ConfirmDialogState | null>(null);
+
+const [confirmLoading, setConfirmLoading] = useState(false);
+const [toast, setToast] = useState<ToastState | null>(null);
+
+function showToast(
+  message: string,
+  type: "success" | "error" = "success"
+) {
+  setToast({ message, type });
+}
+
+useEffect(() => {
+  if (!toast) return;
+
+  const timer = window.setTimeout(() => {
+    setToast(null);
+  }, 3500);
+
+  return () => window.clearTimeout(timer);
+}, [toast]);
+
+async function handleConfirmAction() {
+  if (!confirmDialog || confirmLoading) return;
+
+  setConfirmLoading(true);
+
+  try {
+    await confirmDialog.onConfirm();
+  } finally {
+    setConfirmLoading(false);
+    setConfirmDialog(null);
+  }
+}
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingTotal, setBookingTotal] = useState(0);
@@ -282,8 +332,8 @@ const [membershipError, setMembershipError] = useState("");
     setSummaryLoading(false);
   }
 }
-  
- 
+
+
 
   useEffect(() => {
   if (!token) return;
@@ -384,7 +434,7 @@ await Promise.all([
   loadPricing(),
 ]);
 
-setMessage("Admin settings loaded successfully.");
+showToast("Admin settings loaded successfully.");
 
     } catch (err) {
       setConfig(null);
@@ -645,22 +695,49 @@ async function saveCoupon(event: React.FormEvent<HTMLFormElement>) {
 
 async function toggleCouponStatus(coupon: Coupon) {
   const activate = !coupon.is_active;
-  if (!window.confirm(`Are you sure you want to ${activate ? "activate" : "deactivate"} ${coupon.code}?`)) return;
-  setCouponError("");
-  try {
-    if (activate) {
-      await apiRequest(`/api/admin/coupons/${coupon.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ is_active: true }),
-      });
-    } else {
-      await apiRequest(`/api/admin/coupons/${coupon.id}`, { method: "DELETE" });
-    }
-    setMessage(`Coupon ${activate ? "activated" : "deactivated"} successfully.`);
-    await loadCoupons();
-  } catch (err) {
-    setCouponError(err instanceof Error ? err.message : "Unable to update coupon status.");
-  }
+
+  setConfirmDialog({
+    title: activate ? "Activate coupon?" : "Deactivate coupon?",
+    message: activate
+      ? `Are you sure you want to activate "${coupon.code}"?`
+      : `Are you sure you want to deactivate "${coupon.code}"? Customers may no longer be able to apply this coupon.`,
+    confirmLabel: activate ? "Activate" : "Deactivate",
+
+    onConfirm: async () => {
+      setCouponError("");
+
+      try {
+        if (activate) {
+          await apiRequest(`/api/admin/coupons/${coupon.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ is_active: true }),
+          });
+        } else {
+          await apiRequest(`/api/admin/coupons/${coupon.id}`, {
+            method: "DELETE",
+          });
+        }
+
+        setMessage(
+          `Coupon ${activate ? "activated" : "deactivated"} successfully.`
+        );
+
+        showToast(
+          `Coupon ${activate ? "activated" : "deactivated"} successfully.`
+        );
+
+        await loadCoupons();
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Unable to update coupon status.";
+
+        setCouponError(errorMessage);
+        showToast(errorMessage, "error");
+      }
+    },
+  });
 }
 
 function resetMembershipForm() {
@@ -721,30 +798,41 @@ async function saveMembershipPlan(event: React.FormEvent<HTMLFormElement>) {
 }
 
 async function toggleMembershipStatus(plan: MembershipPlan) {
-  const action = plan.is_active ? "deactivate" : "activate";
+  const activate = !plan.is_active;
+  const action = activate ? "activate" : "deactivate";
 
-  if (!window.confirm(`Are you sure you want to ${action} ${plan.name}?`)) {
-    return;
-  }
+  setConfirmDialog({
+    title: `${activate ? "Activate" : "Deactivate"} membership?`,
+    message: `Are you sure you want to ${action} "${plan.name}"?`,
+    confirmLabel: activate ? "Activate" : "Deactivate",
 
-  setMembershipError("");
+    onConfirm: async () => {
+      setMembershipError("");
 
-  try {
-    await apiRequest(
-      `/api/admin/memberships/plans/${plan.id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({ is_active: !plan.is_active }),
+      try {
+        await apiRequest(
+          `/api/admin/memberships/plans/${plan.id}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify({ is_active: activate }),
+          }
+        );
+
+        setMessage(`Membership plan ${action}d successfully.`);
+        showToast(`Membership plan ${action}d successfully.`);
+
+        await loadMembershipPlans();
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Unable to update membership status.";
+
+        setMembershipError(errorMessage);
+        showToast(errorMessage, "error");
       }
-    );
-
-    setMessage(`Membership plan ${action}d successfully.`);
-    await loadMembershipPlans();
-  } catch (err) {
-    setMembershipError(
-      err instanceof Error ? err.message : "Unable to update membership status."
-    );
-  }
+    },
+  });
 }
 
   useEffect(() => {
@@ -774,7 +862,7 @@ async function toggleMembershipStatus(plan: MembershipPlan) {
     );
   }
 
-  
+
 
   async function saveFacility() {
     if (!config) return;
@@ -802,7 +890,7 @@ async function toggleMembershipStatus(plan: MembershipPlan) {
     }
   }
 
-  
+
 
   function toggleDay(day: string) {
     if (!config) return;
@@ -873,39 +961,63 @@ async function toggleMembershipStatus(plan: MembershipPlan) {
     booking: Booking,
     kind: "status" | "payment",
     value: string,
+    confirmed = false,
+
   ) {
     const currentValue =
       kind === "status" ? booking.status : booking.payment_status;
 
     if (value === currentValue) return;
 
-    if (
-      kind === "payment" &&
-      value === "paid" &&
-      !window.confirm(
-        "Have you verified that this booking's payment was actually received?",
-      )
-    ) {
-      return;
-    }
+    // Confirmation before marking a booking as paid
+if (
+  !confirmed &&
+  kind === "payment" &&
+  value === "paid"
+) {
+  setConfirmDialog({
+    title: "Confirm payment received",
+    message:
+      "Have you verified that this booking's payment was actually received?",
+    confirmLabel: "Yes, confirm payment",
 
-    if (
-      kind === "status" &&
-      value === "cancelled" &&
-      booking.payment_status === "paid" &&
-      !window.confirm(
-        "This booking is marked as paid. Your backend may reject cancellation until the payment/refund is handled. Continue?",
-      )
-    ) {
-      return;
-    }
+    onConfirm: async () => {
+      await updateBooking(booking, kind, value, true);
+    },
+  });
+
+  return;
+}
+
+// Confirmation before cancelling an already-paid booking
+if (
+  !confirmed &&
+  kind === "status" &&
+  value === "cancelled" &&
+  booking.payment_status === "paid"
+) {
+  setConfirmDialog({
+    title: "Cancel paid booking?",
+    message:
+      "This booking is marked as paid. Payment or refund handling may be required. Do you want to continue?",
+    confirmLabel: "Continue cancellation",
+
+    onConfirm: async () => {
+      await updateBooking(booking, kind, value, true);
+    },
+  });
+
+  return;
+}
+
+
 
     setUpdatingBooking(`${booking.booking_reference}-${kind}`);
     setBookingError("");
     setMessage("");
 
     try {
-      
+
       const params = new URLSearchParams({
         [kind === "payment" ? "payment_status" : "status"]: value,
       });
@@ -921,15 +1033,23 @@ async function toggleMembershipStatus(plan: MembershipPlan) {
           ? "Booking status updated."
           : "Payment status updated.",
       );
+      showToast(
+  kind === "status"
+    ? "Booking status updated successfully."
+    : "Payment status updated successfully."
+);
 
       await loadBookings(bookingPage);
       await loadSummary();
     } catch (err) {
-      setBookingError(
-        err instanceof Error ? err.message : "Unable to update booking.",
-      );
-      await loadBookings(bookingPage);
-    } finally {
+  const errorMessage =
+    err instanceof Error ? err.message : "Unable to update booking.";
+
+  setBookingError(errorMessage);
+  showToast(errorMessage, "error");
+
+  await loadBookings(bookingPage);
+} finally {
       setUpdatingBooking(null);
     }
   }
@@ -938,6 +1058,9 @@ async function toggleMembershipStatus(plan: MembershipPlan) {
   sessionStorage.removeItem("admin_access_token");
   sessionStorage.removeItem("admin_token_expires_at");
 
+  setToast(null);
+  setConfirmDialog(null);
+  setConfirmLoading(false);
   setToken(null);
   setPassword("");
   setConfig(null);
@@ -959,12 +1082,16 @@ async function toggleMembershipStatus(plan: MembershipPlan) {
     <main className="admin-page">
       <header className="admin-header">
         <a className="admin-brand" href="/">
-          <span className="admin-brand-mark">K</span>
-          <span>
-            THE KING
-            <strong>ELITE ARENA</strong>
-          </span>
-        </a>
+  <img
+    src={kingArenaLogo}
+    alt="The King Elite Arena"
+    className="admin-brand-logo"
+  />
+  <span>
+    THE KING
+    <strong>ELITE ARENA</strong>
+  </span>
+</a>
 
        <div className="admin-header-actions">
   {token && (
@@ -1113,6 +1240,33 @@ setPassword("");
         </strong>
         <small>Bookings marked as paid</small>
       </article>
+
+      <article className="admin-summary-card">
+        <span>Membership Revenue</span>
+        <strong>
+          {summaryLoading && !summary
+            ? "..."
+            : `₹${(summary?.membership_revenue ?? 0).toLocaleString("en-IN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
+        </strong>
+        <small>Successfully paid memberships</small>
+      </article>
+
+      <article className="admin-summary-card">
+        <span>Total Revenue</span>
+        <strong>
+          {summaryLoading && !summary
+            ? "..."
+            : `₹${(summary?.total_revenue ?? 0).toLocaleString("en-IN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
+        </strong>
+        <small>Booking + membership revenue</small>
+      </article>
+
     </section>
 
             <section className="admin-panel">
@@ -2038,6 +2192,68 @@ setPassword("");
           </>
         )}
       </section>
+              {/* Toast notification */}
+      {toast && (
+        <div
+          className={`admin-toast ${toast.type}`}
+          role="status"
+          aria-live="polite"
+        >
+          <span>{toast.type === "success" ? "✓" : "!"}</span>
+          {toast.message}
+
+          <button
+            type="button"
+            className="admin-toast-close"
+            aria-label="Close notification"
+            onClick={() => setToast(null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* Confirmation dialog */}
+      {confirmDialog && (
+        <div className="admin-confirm-overlay">
+          <div
+            className="admin-confirm-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="admin-confirm-title"
+            aria-describedby="admin-confirm-message"
+          >
+            <h3 id="admin-confirm-title">
+              {confirmDialog.title}
+            </h3>
+
+            <p id="admin-confirm-message">
+              {confirmDialog.message}
+            </p>
+
+            <div className="admin-confirm-actions">
+              <button
+                type="button"
+                className="admin-secondary-button"
+                disabled={confirmLoading}
+                onClick={() => setConfirmDialog(null)}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={confirmLoading}
+                onClick={() => void handleConfirmAction()}
+              >
+                {confirmLoading
+                  ? "Please wait..."
+                  : confirmDialog.confirmLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer className="admin-footer">
         The King Elite Arena · Admin tools

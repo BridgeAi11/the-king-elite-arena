@@ -24,8 +24,13 @@ from app.models import (
     PaymentCapture,
     PaymentRefund,
     PaymentWebhookEvent,
+    MembershipPaymentOrder,
 )
 
+from app.membership_payment_service import (
+    process_membership_capture,
+    process_membership_payment_failure,
+)
 
 router = APIRouter(
     prefix="/api/payments",
@@ -517,11 +522,113 @@ async def razorpay_webhook(
             event_statement
         ).scalar_one_or_none()
 
+
         if event_record_id is None:
             db.rollback()
             return {"status": "already_processed"}
 
-        # Step 2: Find transaction reference.
+        # Step 2: Check whether this is a membership payment order.
+        membership_order_ref = (
+            db.query(MembershipPaymentOrder)
+            .filter(
+                MembershipPaymentOrder.razorpay_order_id == order_id
+            )
+            .first()
+        )
+
+        if membership_order_ref:
+            expected_payment_status = (
+                "captured"
+                if event_type == "payment.captured"
+                else "failed"
+            )
+
+            if payment.get("status") != expected_payment_status:
+                raise HTTPException(
+                    400,
+                    "Payment status does not match webhook event.",
+                )
+
+            if int(payment.get("amount", 0)) != membership_order_ref.amount_paise:
+                raise HTTPException(400, "Payment amount mismatch.")
+
+            if payment.get("currency") != membership_order_ref.currency:
+                raise HTTPException(400, "Payment currency mismatch.")
+
+            # Process a failed membership payment.
+            if event_type == "payment.failed":
+                result_status = process_membership_payment_failure(
+                    db=db,
+                    payment_order_id=membership_order_ref.id,
+                )
+
+                webhook_event = (
+                    db.query(PaymentWebhookEvent)
+                    .filter(PaymentWebhookEvent.id == event_record_id)
+                    .with_for_update()
+                    .first()
+                )
+
+                webhook_event.status = "processed"
+                webhook_event.processed_at = datetime.now(timezone.utc)
+
+                db.commit()
+
+                return {
+                    "status": result_status,
+                    "membership_order_id": membership_order_ref.id,
+                }
+
+            # Process a captured membership payment.
+            result = process_membership_capture(
+                db=db,
+                payment_order_id=membership_order_ref.id,
+                payment=payment,
+            )
+
+            webhook_event = (
+                db.query(PaymentWebhookEvent)
+                .filter(PaymentWebhookEvent.id == event_record_id)
+                .with_for_update()
+                .first()
+            )
+
+            webhook_event.status = "processed"
+            webhook_event.processed_at = datetime.now(timezone.utc)
+
+            db.commit()
+
+            membership = result["membership"]
+            capture = result["capture"]
+            refund = result["refund"]
+
+            if result["result"] == "activated":
+                return {
+                    "status": "membership_activated",
+                    "membership_id": membership.id,
+                    "capture_id": capture.id,
+                }
+
+            if result["result"] == "refund_pending":
+                return {
+                    "status": "refund_pending",
+                    "capture_id": capture.id,
+                    "refund_id": refund.id,
+                    "refund_status": refund.status,
+                }
+
+            return {
+                "status": "already_processed",
+                "capture_id": capture.id,
+                "membership_id": (
+                    membership.id if membership else None
+                ),
+                "refund_id": refund.id if refund else None,
+            }
+
+        # Step 3: This is a booking payment. Keep the existing
+        # booking payment processing logic unchanged.
+
         transaction_ref = (
             db.query(PaymentTransaction)
             .filter(

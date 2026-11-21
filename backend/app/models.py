@@ -208,9 +208,23 @@ class Customer(Base):
         nullable=False,
     )
 
-    phone: Mapped[str] = mapped_column(
+    phone: Mapped[str | None] = mapped_column(
         String(20),
-        nullable=False,
+        nullable=True,
+        unique=True,
+        index=True,
+    )
+
+    email: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
+
+    google_sub: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
         unique=True,
         index=True,
     )
@@ -227,7 +241,6 @@ class Customer(Base):
         nullable=False,
         server_default=func.now(),
     )
-
 
 class CustomerOTP(Base):
     __tablename__ = "customer_otps"
@@ -289,7 +302,7 @@ class CustomerOTP(Base):
             name="ck_customer_otps_attempts_nonnegative",
         ),
     )
-    
+
 class Booking(Base):
     __tablename__ = "bookings"
 
@@ -310,10 +323,8 @@ class Booking(Base):
         nullable=False,
     )
 
-    customer_phone: Mapped[str] = mapped_column(
-        String(20),
-        nullable=False,
-        index=True,
+    customer_phone: Mapped[str | None] = mapped_column(
+        String(20), nullable=True, index=True
     )
 
     customer_id: Mapped[int | None] = mapped_column(
@@ -426,7 +437,7 @@ class Booking(Base):
             name="ck_bookings_valid_status",
         ),
         CheckConstraint(
-            "payment_status IN ('unpaid', 'paid', 'failed', 'refunded')",
+            "payment_status IN ('unpaid', 'paid', 'failed', 'refunded', 'waived')",
             name="ck_bookings_valid_payment_status",
         ),
         CheckConstraint(
@@ -522,13 +533,23 @@ class CustomerMembership(Base):
         nullable=False,
     )
 
+    customer_id: Mapped[int | None] = mapped_column(
+    ForeignKey("customers.id", ondelete="RESTRICT"),
+    nullable=True,
+    index=True,
+)
+
+    customer_phone: Mapped[str | None] = mapped_column(
+    String(20), nullable=True, index=True
+)
+
     customer_name: Mapped[str] = mapped_column(
         String(120), nullable=False
     )
 
-    customer_phone: Mapped[str] = mapped_column(
-        String(20), nullable=False, index=True
-    )
+    customer_phone: Mapped[str | None] = mapped_column(
+    String(20), nullable=True, index=True
+)
 
     plan_name: Mapped[str] = mapped_column(
         String(120), nullable=False
@@ -775,7 +796,7 @@ class MembershipPaymentOrder(Base):
         ),
     )
 
-    
+
 class AdminUser(Base):
     __tablename__ = "admin_users"
 
@@ -1247,6 +1268,147 @@ class PaymentRefund(Base):
         CheckConstraint(
             "status IN ('pending', 'processing', 'processed', 'failed')",
             name="ck_payment_refunds_valid_status",
+        ),
+    )
+class MembershipPaymentCapture(Base):
+    __tablename__ = "membership_payment_captures"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
+
+    membership_payment_order_id: Mapped[int] = mapped_column(
+        ForeignKey("membership_payment_orders.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+
+    razorpay_payment_id: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    amount_paise: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    currency: Mapped[str] = mapped_column(
+        String(3),
+        nullable=False,
+        default="INR",
+        server_default="INR",
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="captured",
+        server_default="captured",
+    )
+
+    captured_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "amount_paise > 0",
+            name="ck_membership_payment_captures_amount_positive",
+        ),
+        CheckConstraint(
+            "status IN ('captured', 'partially_refunded', 'refunded')",
+            name="ck_membership_payment_captures_valid_status",
+        ),
+    )
+
+class MembershipPaymentRefund(Base):
+    __tablename__ = "membership_payment_refunds"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
+
+    membership_payment_order_id: Mapped[int] = mapped_column(
+        ForeignKey("membership_payment_orders.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+
+    capture_id: Mapped[int] = mapped_column(
+        ForeignKey("membership_payment_captures.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+
+    razorpay_refund_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
+
+    idempotency_key: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    amount_paise: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="pending",
+        server_default="pending",
+    )
+
+    reason: Mapped[str | None] = mapped_column(
+        String(300),
+        nullable=True,
+    )
+
+    processing_started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "amount_paise > 0",
+            name="ck_membership_payment_refunds_amount_positive",
+        ),
+        CheckConstraint(
+            "status IN ('pending', 'processing', 'processed', 'failed')",
+            name="ck_membership_payment_refunds_valid_status",
         ),
     )
 

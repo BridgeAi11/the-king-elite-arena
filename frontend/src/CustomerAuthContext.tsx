@@ -11,7 +11,8 @@ import API_URL from "./api";
 
 export type Customer = {
   id: number;
-  phone: string;
+  phone: string | null;
+  email: string | null;
   full_name: string;
   is_active: boolean;
 };
@@ -38,7 +39,6 @@ export function CustomerAuthProvider({
   );
 
   const [customer, setCustomer] = useState<Customer | null>(null);
-
   const [authLoading, setAuthLoading] = useState(true);
 
   async function refreshCustomer() {
@@ -54,11 +54,14 @@ export function CustomerAuthProvider({
     setAuthLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/customer-auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/api/customer-auth/me`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Customer session expired.");

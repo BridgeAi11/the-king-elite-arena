@@ -16,13 +16,13 @@ from app.models import (
     MembershipPaymentOrder,
     MembershipTransaction,
 )
+from app.membership_payment_service import process_membership_capture
 from app.payment_routes import get_razorpay_client
 
 from datetime import datetime, timedelta, timezone
 
 from pydantic import BaseModel, Field
 
-from app.models import MembershipTransaction
 
 
 router = APIRouter(
@@ -36,13 +36,14 @@ class VerifyMembershipPaymentRequest(BaseModel):
     razorpay_signature: str = Field(min_length=1, max_length=256)
 
 
+
 @router.post("/verify")
 def verify_membership_payment(
     data: VerifyMembershipPaymentRequest,
     customer: Customer = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    # Find the membership payment order.
+    # Find the order belonging to the authenticated customer.
     order_ref = (
         db.query(MembershipPaymentOrder)
         .filter(
@@ -54,11 +55,14 @@ def verify_membership_payment(
     )
 
     if not order_ref:
-        raise HTTPException(404, "Membership payment order not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Membership payment order not found.",
+        )
 
     client = get_razorpay_client()
 
-    # Verify Razorpay signature and fetch payment details.
+    # Verify Razorpay signature and fetch the payment.
     try:
         client.utility.verify_payment_signature({
             "razorpay_order_id": data.razorpay_order_id,
@@ -69,160 +73,56 @@ def verify_membership_payment(
         payment = client.payment.fetch(data.razorpay_payment_id)
 
     except razorpay.errors.SignatureVerificationError:
-        raise HTTPException(400, "Invalid Razorpay payment signature.")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid Razorpay payment signature.",
+        )
 
     except Exception:
         raise HTTPException(
-            502,
-            "Unable to verify membership payment with Razorpay.",
+            status_code=502,
+            detail="Unable to verify membership payment with Razorpay.",
         )
-
-    if payment.get("order_id") != data.razorpay_order_id:
-        raise HTTPException(400, "Payment order mismatch.")
-
-    if int(payment.get("amount", 0)) != order_ref.amount_paise:
-        raise HTTPException(400, "Payment amount mismatch.")
-
-    if payment.get("currency") != order_ref.currency:
-        raise HTTPException(400, "Payment currency mismatch.")
-
-    if payment.get("status") != "captured":
-        raise HTTPException(409, "Membership payment is not captured.")
 
     try:
-        # Lock the customer first. This serializes purchases
-        # when a customer verifies multiple membership payments.
-        locked_customer = (
-            db.query(Customer)
-            .filter(Customer.id == customer.id)
-            .with_for_update()
-            .first()
+        result = process_membership_capture(
+            db=db,
+            payment_order_id=order_ref.id,
+            payment=payment,
         )
-
-        if not locked_customer:
-            raise HTTPException(404, "Customer not found.")
-
-        # Lock the payment order.
-        payment_order = (
-            db.query(MembershipPaymentOrder)
-            .filter(
-                MembershipPaymentOrder.id == order_ref.id,
-                MembershipPaymentOrder.customer_id == customer.id,
-            )
-            .with_for_update()
-            .first()
-        )
-
-        if not payment_order:
-            raise HTTPException(404, "Membership order not found.")
-
-        # Idempotency: never create the same membership twice.
-        if payment_order.status == "paid":
-            existing_membership = (
-                db.query(CustomerMembership)
-                .filter(
-                    CustomerMembership.id == payment_order.membership_id
-                )
-                .first()
-            )
-
-            if existing_membership:
-                db.rollback()
-                return {
-                    "message": "Membership payment already processed.",
-                    "membership_id": existing_membership.id,
-                    "membership_status": existing_membership.status,
-                    "start_date": existing_membership.start_date.isoformat(),
-                    "expiry_date": existing_membership.expiry_date.isoformat(),
-                }
-
-            raise HTTPException(
-                409,
-                "Payment is marked paid but membership record is missing.",
-            )
-
-        if payment_order.status != "created":
-            raise HTTPException(409, "Membership order is not payable.")
-
-        # Check whether this payment ID was already used.
-        duplicate_payment = (
-            db.query(MembershipPaymentOrder)
-            .filter(
-                MembershipPaymentOrder.razorpay_payment_id
-                == data.razorpay_payment_id
-            )
-            .first()
-        )
-
-        if duplicate_payment:
-            raise HTTPException(
-                409,
-                "This Razorpay payment is already associated with an order.",
-            )
-
-        now = datetime.now(timezone.utc)
-
-        # Find the latest unexpired active or scheduled membership.
-        latest_membership = (
-            db.query(CustomerMembership)
-            .filter(
-                CustomerMembership.customer_phone
-                == locked_customer.phone,
-                CustomerMembership.status.in_(["active", "scheduled"]),
-                CustomerMembership.expiry_date > now,
-            )
-            .order_by(CustomerMembership.expiry_date.desc())
-            .first()
-        )
-
-        if latest_membership:
-            start_date = latest_membership.expiry_date
-        else:
-            start_date = now
-
-        expiry_date = start_date + timedelta(
-            days=payment_order.validity_days_snapshot
-        )
-
-        membership_status = (
-            "active" if start_date <= now else "scheduled"
-        )
-
-        # Create the membership using purchased plan snapshots.
-        membership = CustomerMembership(
-            plan_id=payment_order.plan_id,
-            customer_name=locked_customer.full_name,
-            customer_phone=locked_customer.phone,
-            plan_name=payment_order.plan_name_snapshot,
-            amount_paid=payment_order.plan_price_snapshot,
-            total_hours=payment_order.included_hours_snapshot,
-            used_hours=0,
-            reserved_hours=0,
-            start_date=start_date,
-            expiry_date=expiry_date,
-            status=membership_status,
-        )
-
-        db.add(membership)
-        db.flush()
-
-        # Record successful membership payment.
-        transaction = MembershipTransaction(
-            membership_id=membership.id,
-            amount=payment_order.plan_price_snapshot,
-            payment_method="razorpay",
-            payment_status="paid",
-            transaction_reference=data.razorpay_payment_id,
-        )
-
-        db.add(transaction)
-
-        payment_order.razorpay_payment_id = data.razorpay_payment_id
-        payment_order.membership_id = membership.id
-        payment_order.status = "paid"
 
         db.commit()
-        db.refresh(membership)
+
+        membership = result["membership"]
+        capture = result["capture"]
+        refund = result["refund"]
+
+        if result["result"] == "already_processed":
+            return {
+                "message": "Membership payment already processed.",
+                "membership_id": (
+                    membership.id if membership else None
+                ),
+                "membership_status": (
+                    membership.status if membership else None
+                ),
+                "capture_id": capture.id,
+                "refund_id": refund.id if refund else None,
+                "refund_status": refund.status if refund else None,
+            }
+
+        if result["result"] == "refund_pending":
+            return {
+                "message": (
+                    "Payment captured, but the membership order "
+                    "was not activated. Refund review is pending."
+                ),
+                "membership_id": None,
+                "capture_id": capture.id,
+                "capture_status": capture.status,
+                "refund_id": refund.id,
+                "refund_status": refund.status,
+            }
 
         return {
             "message": "Membership payment verified successfully.",
@@ -232,6 +132,8 @@ def verify_membership_payment(
             "start_date": membership.start_date.isoformat(),
             "expiry_date": membership.expiry_date.isoformat(),
             "total_hours": float(membership.total_hours),
+            "capture_id": capture.id,
+            "capture_status": capture.status,
         }
 
     except HTTPException:
@@ -241,8 +143,8 @@ def verify_membership_payment(
     except Exception:
         db.rollback()
         raise HTTPException(
-            500,
-            "Unable to activate membership after payment.",
+            status_code=500,
+            detail="Unable to process membership payment.",
         )
 
 

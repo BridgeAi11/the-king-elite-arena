@@ -98,7 +98,7 @@ const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   try {
     const response = await fetch(
       `${API_URL
-    
+
       }/api/public/my-memberships`,
       {
         headers: {
@@ -240,7 +240,7 @@ async function buyMembership(planId: number) {
 
         prefill: {
           name: customer.full_name,
-          contact: customer.phone,
+          contact: customer.phone ?? "",
         },
 
         handler: async (paymentResponse) => {
@@ -324,27 +324,40 @@ async function buyMembership(planId: number) {
           ← Back to Home
         </a>
 
-        <header className="membership-page-header">
-          <div>
-            <span className="membership-eyebrow">YOUR ACCOUNT</span>
-            <h1>My Membership</h1>
-            <p>
-              Welcome back, {customer.full_name}. Manage your arena
-              membership and track your playing hours.
-            </p>
-          </div>
 
-          <button
-            className="membership-refresh"
-            onClick={() => void loadMemberships()}
-            disabled={loading}
-          >
-            {loading ? "Loading..." : "↻ Refresh"}
-          </button>
-        </header>
+
+<header className="membership-page-header">
+  <div className="membership-header-top">
+    <span className="membership-eyebrow">
+      YOUR ACCOUNT
+    </span>
+
+    <button
+      className="membership-refresh"
+      onClick={() => void loadMemberships()}
+      disabled={loading}
+    >
+      {loading ? "Loading..." : "↻ Refresh"}
+    </button>
+  </div>
+
+  <div className="membership-header-content">
+    <h1>My Membership</h1>
+    <p>
+      Welcome back, {customer.full_name}. Manage your arena
+      membership and track your playing hours.
+    </p>
+  </div>
+</header>
+
+
 
         {loading ? (
-          <div className="membership-empty">Loading your membership...</div>
+  <div className="membership-empty" role="status">
+    <span className="membership-loading-mark">♛</span>
+    <h2>Loading your membership</h2>
+    <p>Please wait while we retrieve your membership details.</p>
+  </div>
         ) : error ? (
           <div className="membership-empty">
             <p>{error}</p>
@@ -374,9 +387,11 @@ async function buyMembership(planId: number) {
 
               return (
                 <article
+
                   className="customer-membership-card"
                   key={item.membership_id}
                 >
+                  <div className="membership-main-content">
                   <div className="customer-membership-top">
                     <div>
                       <span className="membership-card-label">
@@ -443,6 +458,7 @@ async function buyMembership(planId: number) {
                       <strong>{formatDate(item.expiry_date)}</strong>
                     </div>
                   </div>
+                  </div>
                   {membershipQrs[item.membership_id] && (
   <div className="membership-qr-section">
     <h3>Your Membership QR Code</h3>
@@ -498,7 +514,13 @@ async function buyMembership(planId: number) {
               ))}
             </div>
             {membershipMessage && (
-  <div className="membership-payment-message" role="status">
+  <div
+    className={`membership-payment-message ${
+      purchaseSuccess ? "is-success" : "is-error"
+    }`}
+    role={purchaseSuccess ? "status" : "alert"}
+    aria-live="polite"
+  >
     <p>{membershipMessage}</p>
 
     {purchaseSuccess && (

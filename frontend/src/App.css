@@ -2291,3 +2291,886 @@
     line-height: 1.7;
   }
 }
+
+
+/* ==========================================
+   KING ELITE ARENA
+   MOBILE & TABLET EXPERIENCE IMPROVEMENTS
+   ========================================== */
+
+/* Prevent horizontal overflow */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+#root {
+  width: 100%;
+  min-width: 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Better touch interactions */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+.nav-cta,
+.button {
+  touch-action: manipulation;
+}
+
+/* TABLET AND MOBILE NAVIGATION */
+@media (max-width: 900px) {
+  .site-header {
+    min-height: 68px;
+    padding: 8px 5%;
+    gap: 12px;
+  }
+
+  .brand {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .brand-logo {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font-size: 12px;
+    letter-spacing: 1.2px;
+  }
+
+  .brand-name strong {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+  }
+
+  .navigation {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    max-height: calc(100dvh - 68px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px 5% 20px;
+    background: #101010;
+    border-bottom: 1px solid rgba(229, 189, 112, 0.25);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.45);
+  }
+
+  .navigation.navigation-open {
+    display: flex;
+  }
+
+  .navigation > a:not(.nav-cta) {
+    display: flex;
+    align-items: center;
+    min-height: 52px;
+    padding: 10px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 14px;
+  }
+
+  .navigation .nav-cta {
+    width: 100%;
+    min-height: 50px;
+    margin-top: 14px;
+  }
+
+  .profile-menu-wrap {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .profile-menu-button {
+    width: 100%;
+    min-height: 54px;
+    padding: 8px 12px;
+  }
+
+  .profile-dropdown {
+    position: static;
+    width: 100%;
+    margin-top: 8px;
+    box-shadow: none;
+  }
+
+  .profile-dropdown .profile-logout {
+    min-height: 46px;
+  }
+}
+
+/* TABLET LAYOUT */
+@media (min-width: 681px) and (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr 0.85fr;
+    gap: 28px;
+    padding: 60px 5%;
+  }
+
+  .hero h1 {
+    font-size: clamp(48px, 6.5vw, 68px);
+  }
+
+  .hero-image {
+    min-height: 320px;
+  }
+
+  .section {
+    padding: 65px 5%;
+  }
+
+  .pricing-grid,
+  .membership-plans-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* MOBILE */
+@media (max-width: 680px) {
+
+  /* HEADER */
+  .site-header {
+    min-height: 64px;
+    padding: 6px 4%;
+  }
+
+  .brand-logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .brand-name {
+    font-size: 11px;
+  }
+
+  .brand-name strong {
+    font-size: 8px;
+  }
+
+  .menu-toggle {
+    width: 44px;
+    height: 44px;
+    font-size: 21px;
+  }
+
+  /* HERO */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+    min-height: auto;
+    padding: 42px 5% 48px;
+  }
+
+  .hero-content {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+
+  .hero h1 {
+    margin: 20px 0 16px;
+    font-size: clamp(46px, 12vw, 68px);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .hero-description {
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .hero-actions .button {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .hero-highlights {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 30px;
+    padding-top: 20px;
+  }
+
+  .hero-highlights div {
+    min-width: 0;
+  }
+
+  .hero-highlights strong {
+    font-size: 27px;
+  }
+
+  .hero-highlights span {
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  /* HERO IMAGE */
+  .hero-visual {
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 0;
+  }
+
+  .hero-image {
+    min-height: 250px;
+    border-radius: 10px;
+  }
+
+  .hero-image img {
+    object-fit: cover;
+  }
+
+  .image-caption {
+    padding: 18px;
+  }
+
+  .image-caption strong {
+    font-size: 23px;
+  }
+
+  .floating-card {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    max-width: 100%;
+    margin: 12px 0 0;
+    padding: 13px;
+    border-radius: 8px;
+  }
+
+  /* COMMON SECTIONS */
+  .section {
+    padding: 52px 5%;
+  }
+
+  .section-heading {
+    display: block;
+    margin-bottom: 24px;
+  }
+
+  .section-heading h2,
+  .membership-content h2,
+  .contact-section h2 {
+    margin: 12px 0;
+    font-size: clamp(34px, 9vw, 44px);
+    line-height: 1.1;
+  }
+
+  .section-heading > p {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* PRICING */
+  .pricing-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 15px;
+  }
+
+  .pricing-card {
+    min-width: 0;
+    padding: 21px;
+    border-radius: 10px;
+  }
+
+  .pricing-rule {
+    gap: 10px;
+    padding: 15px 0;
+  }
+
+  .pricing-rule > span {
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .pricing-rule > strong {
+    font-size: 15px;
+  }
+
+  .pricing-explanation,
+  .pricing-note {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .full-button {
+    min-height: 50px;
+  }
+
+  /* MEMBERSHIP */
+  .membership-section {
+    display: block;
+    padding: 52px 5%;
+  }
+
+  .membership-content {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .membership-content > p {
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .membership-plans-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 22px;
+  }
+
+  .membership-plan-card {
+    width: 100%;
+    min-width: 0;
+    padding: 22px;
+    border-radius: 10px;
+  }
+
+  .membership-plan-card h3 {
+    font-size: 25px;
+    overflow-wrap: anywhere;
+  }
+
+  .membership-plan-price {
+    font-size: 38px;
+  }
+
+  .membership-plan-details {
+    gap: 12px;
+  }
+
+  .membership-plan-details span {
+    font-size: 13px;
+  }
+
+  .membership-plan-card .button {
+    width: 100%;
+    min-height: 50px;
+  }
+
+  .membership-decoration {
+    display: none;
+  }
+
+  /* CONTACT */
+  .contact-section {
+    padding: 58px 5%;
+  }
+
+  .contact-section h2 {
+    font-size: clamp(33px, 9vw, 41px);
+  }
+
+  .contact-section > p {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .contact-section .button {
+    width: 100%;
+    max-width: 340px;
+    min-height: 52px;
+  }
+
+  /* FOOTER */
+  .site-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 25px 5%;
+  }
+
+  .site-footer > p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .copyright {
+    font-size: 10px;
+  }
+}
+
+/* SMALL PHONES */
+@media (max-width: 380px) {
+  .brand-logo {
+    width: 43px;
+    height: 43px;
+  }
+
+  .brand-name {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .brand-name strong {
+    font-size: 8px;
+    letter-spacing: 1.2px;
+  }
+
+  .hero h1 {
+    font-size: 45px;
+  }
+
+  .hero-highlights strong {
+    font-size: 24px;
+  }
+
+  .hero-highlights span {
+    font-size: 9px;
+  }
+
+  .pricing-card,
+  .membership-plan-card {
+    padding: 18px;
+  }
+
+  .pricing-rule > strong {
+    font-size: 14px;
+  }
+}
+
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================
+   CONTACT SECTION – PREMIUM REFINEMENT
+========================================= */
+
+.contact-section {
+  padding: 100px 7%;
+  min-height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-top: 1px solid rgba(232, 190, 105, 0.15);
+  background:
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(232, 190, 105, 0.07),
+      transparent 60%
+    ),
+    #111111;
+}
+
+.contact-section > * {
+  max-width: 850px;
+}
+
+.contact-section h2 {
+  max-width: 760px;
+  margin: 22px auto;
+  font-size: clamp(2.5rem, 5vw, 4.2rem);
+  line-height: 1.08;
+  letter-spacing: -1.8px;
+}
+
+.contact-section p {
+  max-width: 560px;
+  margin: 0 auto 30px;
+  color: #bcbcbc;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.contact-section a,
+.contact-section button {
+  min-height: 54px;
+  border-radius: 9px;
+  font-weight: 700;
+}
+
+/* =========================================
+   FOOTER – LOGO AND BRAND
+========================================= */
+
+.site-footer {
+  padding: 38px 7% 22px;
+  background: #080808;
+  border-top: 1px solid rgba(232, 190, 105, 0.18);
+}
+
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.footer-logo {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  display: block;
+  border: 1px solid rgba(232, 190, 105, 0.6);
+  border-radius: 8px;
+}
+
+.footer-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.footer-brand-text strong {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.footer-brand-text span {
+  color: #e8be69;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.footer-brand > p {
+  margin: 16px 0 24px;
+  color: #a9a9a9;
+  font-size: 14px;
+}
+
+.footer-bottom {
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #999999;
+  font-size: 12px;
+}
+
+/* =========================================
+   MOBILE REFINEMENT
+========================================= */
+
+@media (max-width: 680px) {
+  .contact-section {
+    padding: 65px 22px;
+    min-height: auto;
+  }
+
+  .contact-section h2 {
+    font-size: clamp(2.15rem, 9vw, 2.8rem);
+    line-height: 1.12;
+    letter-spacing: -1px;
+    margin: 18px auto;
+  }
+
+  .contact-section p {
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 25px;
+  }
+
+  .contact-section a,
+  .contact-section button {
+    width: 100%;
+    min-height: 54px;
+  }
+
+  .site-footer {
+    padding: 30px 22px 20px;
+  }
+
+  .footer-logo {
+    width: 58px;
+    height: 58px;
+  }
+
+  .footer-brand-text strong {
+    font-size: 15px;
+  }
+
+  .footer-brand-text span {
+    font-size: 11px;
+  }
+
+  .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+
+/* =====================================
+   CONTACT SECTION – FIXED LAYOUT
+===================================== */
+
+.contact-section {
+  min-height: 430px;
+  padding: 85px 7%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at center, rgba(232,190,105,0.055), transparent 65%),
+    #111111;
+  border-top: 1px solid rgba(232,190,105,0.16);
+}
+
+.contact-section > * {
+  width: 100%;
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.contact-section h2 {
+  margin-top: 18px;
+  margin-bottom: 20px;
+  font-size: clamp(2.5rem, 4.5vw, 4rem);
+  line-height: 1.12;
+  letter-spacing: -1.5px;
+  text-align: center;
+}
+
+.contact-section p {
+  max-width: 570px;
+  margin: 0 auto 28px;
+  color: #bdbdbd;
+  font-size: 17px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.contact-section a,
+.contact-section button {
+  display: inline-flex;
+  width: auto;
+  min-width: 190px;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28px;
+  border-radius: 9px;
+}
+
+/* =====================================
+   FOOTER – DESKTOP ALIGNMENT
+===================================== */
+
+.site-footer {
+  padding: 38px 7% 22px;
+  background: #080808;
+  border-top: 1px solid rgba(232,190,105,0.16);
+  text-align: left;
+}
+
+.footer-inner {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.footer-brand {
+  width: 100%;
+  text-align: left;
+}
+
+.footer-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+}
+
+.footer-logo {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  border: 1px solid rgba(232,190,105,0.55);
+  border-radius: 9px;
+}
+
+.footer-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.footer-brand-text strong {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.footer-brand-text span {
+  color: #e8be69;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.footer-brand > p {
+  margin: 16px 0 24px;
+  color: #a9a9a9;
+  font-size: 14px;
+}
+
+.footer-bottom {
+  width: 100%;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.09);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: #999999;
+  font-size: 12px;
+}
+
+/* =====================================
+   MOBILE
+===================================== */
+
+@media (max-width: 680px) {
+  .contact-section {
+    min-height: 390px;
+    padding: 65px 22px;
+  }
+
+  .contact-section h2 {
+    font-size: clamp(2.1rem, 9vw, 2.8rem);
+    line-height: 1.13;
+    letter-spacing: -0.8px;
+  }
+
+  .contact-section p {
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 25px;
+  }
+
+  .contact-section a,
+  .contact-section button {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .site-footer {
+    padding: 30px 22px 20px;
+  }
+
+  .footer-logo {
+    width: 58px;
+    height: 58px;
+  }
+
+  .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+
+/* FINAL CONTACT SECTION POLISH */
+
+/* Center the eyebrow label */
+.contact-section .section-eyebrow {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Better desktop proportions */
+@media (min-width: 1100px) {
+  .contact-section {
+    min-height: 390px;
+    padding: 65px 6%;
+  }
+
+  .contact-section h2 {
+    max-width: 1150px;
+    font-size: clamp(2.8rem, 4vw, 3.8rem);
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    white-space: nowrap;
+  }
+
+  .contact-section p {
+    max-width: 650px;
+  }
+}
+
+/* Prevent heading overflow on smaller screens */
+@media (max-width: 1099px) {
+  .contact-section h2 {
+    white-space: normal;
+  }
+}

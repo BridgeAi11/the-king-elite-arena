@@ -505,18 +505,30 @@
         </section>
 
         <footer className="site-footer">
-          <a className="brand footer-brand" href="#home">
-            <span className="brand-mark">K</span>
-            <span className="brand-name">
-              THE KING
-              <strong>ELITE ARENA</strong>
-            </span>
-          </a>
-          <p>Built for the game. Made for champions.</p>
-          <span className="copyright">
-            © {new Date().getFullYear()} The King Elite Arena
-          </span>
-        </footer>
+  <div className="footer-inner">
+    <div className="footer-brand">
+      <a href="/" className="footer-brand-link">
+        <img
+          src={kingArenaLogo}
+          alt="The King Elite Arena"
+          className="footer-logo"
+        />
+
+        <div className="footer-brand-text">
+          <strong>THE KING</strong>
+          <span>ELITE ARENA</span>
+        </div>
+      </a>
+
+      <p>Built for the game. Made for champions.</p>
+    </div>
+
+    <div className="footer-bottom">
+      <span>© {new Date().getFullYear()} The King Elite Arena</span>
+      <span>Play. Compete. Conquer.</span>
+    </div>
+  </div>
+</footer>
       </main>
     );
   }

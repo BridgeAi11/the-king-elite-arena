@@ -213,8 +213,7 @@ def get_membership_qr(
         db.query(CustomerMembership)
         .filter(
             CustomerMembership.id == membership_id,
-            CustomerMembership.customer_phone == customer.phone
-        )
+            CustomerMembership.customer_id == customer.id        )
         .with_for_update()
         .first()
     )
